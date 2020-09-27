@@ -1,0 +1,130 @@
+
+template<class Item>
+OrderedList<Item>::OrderedList()
+{
+    size = 0;
+}
+
+template<class Item>
+OrderedList<Item>::OrderedList(const OrderedList &o)
+{
+    size = o.size;
+
+    if(size != 0)
+    {
+        for(Node<Item>* i = first; i != NULL; i = i->getLink())
+            this->insert(i->getData());
+    }
+    else
+        first->setLink(NULL);
+}
+
+template<class Item>
+OrderedList<Item>::~OrderedList()
+{
+    size = 0;
+    delete []first;
+    first = NULL;
+}
+
+template<class Item>
+void OrderedList<Item>::insert(Item item)
+{
+    Node<Item> *newItem = new Node<Item>(item, NULL);
+    
+    if(size == 0)
+    {
+        first = newItem;
+        last = first;
+    }
+    else if(item < first->getData())
+    {
+        newItem->setLink(first);
+        first = newItem;
+    }
+    else if(item > last->getData())
+    {
+        last->setLink(newItem);
+        last = newItem;
+    }
+    else
+    {
+        Node<Item>* current = first;
+        Node<Item>* previous = first;
+        
+        while(item > current->getData())
+        {
+            previous = current;
+            current = current->getLink();
+        }
+        previous->setLink(newItem);
+        newItem->setLink(current);
+    }
+    size++;
+}
+
+template<class Item>
+Item OrderedList<Item>::get(int index) const
+{
+    Node<Item>* current = first;
+    for(int i = 0; current != NULL; i++)
+    {
+        if(i == index)
+            return current->getData();
+        else
+            current = current->getLink();
+    }
+}
+
+template<class Item>
+void OrderedList<Item>::remove(Item item)
+{
+    //Cancels if the list is empty
+    if(size == 0){return;}
+    
+    //Removes the head and replaces it
+    if(item == first->getData())
+    {
+        first = first->getLink();
+        size--;
+        return;
+    }
+    
+    Node<Item>* current;
+    for(current = first; current->getLink()->getData() != item; current = current->getLink());
+    current->setLink(current->getLink()->getLink());
+    size--;
+}
+
+template<class Item>
+OrderedList<Item>* OrderedList<Item>::kLargest(int length)
+{
+    OrderedList<Item>* out = new OrderedList<Item>();
+    Node<Item>* current = first;
+    int i = size;
+    
+    while(current != NULL)
+    {
+        if(i <= length)
+            out->insert(current->getData());
+        i--;
+        current = current->getLink();
+    }
+    return out;
+}
+
+template <class Item>
+OrderedList<Item>* OrderedList<Item>::operator+(const OrderedList<Item>& o) const
+{
+    OrderedList<Item>* out = new OrderedList<Item>();
+    
+    if(size == 0 && o.size == 0)
+        return out;
+    
+    for(Node<Item>* one = first; one != NULL; one = one->getLink())
+        out->insert(one->getData());
+    for(Node<Item>* two = o.first; two != NULL; two = two->getLink())
+        out->insert(two->getData());
+    
+    return out;
+}
